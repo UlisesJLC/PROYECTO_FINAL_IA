@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Formulario con Imagen</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="text-center mt-5">Sube tu imagen</h1>
+    
+        <div class="form-group mt-4">
+          <input type="file" class="form-control-file" id="imagen" accept="image/*">
+        </div>
+        <img id="preview" src="#" alt="Vista previa de la imagen" class="img-thumbnail w-25 mt-2" style="display: none;">
+        <button onclick="enviarImagen()" class="btn btn-primary">Predecir</button>
+    
+        <div id="resultado" class="mt-3"></div>
+    </div>
+
+  <script>
+    const inputImagen = document.getElementById('imagen');
+    const preview = document.getElementById('preview');
+
+    inputImagen.addEventListener('change', () => {
+      const archivo = inputImagen.files[0];
+      const lector = new FileReader();
+
+      lector.onload = (e) => {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+      }
+
+      if (archivo) {
+        lector.readAsDataURL(archivo);
+      } else {
+        preview.src = '#';
+        preview.style.display = 'none';
+      }
+    });
+    async function enviarImagen() {
+      const imagen = document.getElementById('imagen').files[0];
+      if (!imagen) {
+        alert('Por favor, selecciona una imagen.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('imagen', imagen);
+      console.log(formData.values())
+      try {
+        const response = await fetch('http://127.0.0.1:5000/api/predecir', {  // guarda la respuesta de la api
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          document.getElementById('resultado').innerText = data.prediccion;
+         
+        } else {
+          document.getElementById('resultado').innerText = `Error: ${data.error}`;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('resultado').innerText = 'Error al enviar la imagen.';
+      }
+    }
+  </script>
+
+</body>
+</html>
